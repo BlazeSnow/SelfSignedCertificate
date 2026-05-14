@@ -1,12 +1,29 @@
 param(
-    [Parameter(Mandatory = $true)]
     [string]$ConfigFile
 )
 
 $ErrorActionPreference = "Stop"
 
-# ---- Load configuration ----
-$configPath = if ([IO.Path]::IsPathRooted($ConfigFile)) { $ConfigFile } else { Join-Path $PSScriptRoot $ConfigFile }
+# ---- Select config file ----
+if ($ConfigFile) {
+    $configPath = if ([IO.Path]::IsPathRooted($ConfigFile)) { $ConfigFile } else { Join-Path $PSScriptRoot $ConfigFile }
+}
+else {
+    $jsonFiles = Get-ChildItem -Path $PSScriptRoot -Filter "*.json" | Where-Object { $_.Name -ne "package.json" }
+    if ($jsonFiles.Count -eq 0) {
+        Write-Error "No .json config files found in $PSScriptRoot"
+        exit 1
+    }
+    Write-Host "Available configs:"
+    for ($i = 0; $i -lt $jsonFiles.Count; $i++) {
+        Write-Host "  $($i + 1). $($jsonFiles[$i].Name)"
+    }
+    do {
+        $choice = Read-Host "Select (1-$($jsonFiles.Count))"
+        $valid = $choice -match '^\d+$' -and [int]$choice -ge 1 -and [int]$choice -le $jsonFiles.Count
+    } while (-not $valid)
+    $configPath = $jsonFiles[[int]$choice - 1].FullName
+}
 $config = Get-Content $configPath -Raw | ConvertFrom-Json
 
 # Temporary signing certificate — will be replaced with a Microsoft-issued formal certificate.
