@@ -1,35 +1,38 @@
+param(
+    [Parameter(Mandatory = $true)]
+    [string]$ConfigFile
+)
+
 $ErrorActionPreference = "Stop"
 
-# ---- Certificate configuration ----
-$CertSubject = "CN=C171AF55-419C-4E73-B34E-CB98C8F1EB78"
-$CertFriendly = "BlazeSnow Signing Certificate"
-$CertYears = 10
-$CertStore = "Cert:\CurrentUser\My"
+# ---- Load configuration ----
+$configPath = if ([IO.Path]::IsPathRooted($ConfigFile)) { $ConfigFile } else { Join-Path $PSScriptRoot $ConfigFile }
+$config = Get-Content $configPath -Raw | ConvertFrom-Json
+
 # Temporary signing certificate — will be replaced with a Microsoft-issued formal certificate.
 # Blank password is intentional for build automation.
-$CertPassword = " "
 
-# ---- Output paths (relative to script location) ----
-$CerFile = Join-Path $PSScriptRoot "cert.cer"
-$PfxFile = Join-Path $PSScriptRoot "cert.pfx"
-$PfxBase64File = Join-Path $PSScriptRoot "cert.pfx.txt"
-$ThumbprintFile = Join-Path $PSScriptRoot "THUMBPRINT.txt"
+# ---- Resolve output paths ----
+$CerFile = Join-Path $PSScriptRoot $config.OutputFiles.Cer
+$PfxFile = Join-Path $PSScriptRoot $config.OutputFiles.Pfx
+$PfxBase64File = Join-Path $PSScriptRoot $config.OutputFiles.PfxBase64
+$ThumbprintFile = Join-Path $PSScriptRoot $config.OutputFiles.Thumbprint
 
 # ---- Generate certificate ----
 $cert = New-SelfSignedCertificate `
     -Type Custom `
-    -Subject $CertSubject `
+    -Subject $config.Subject `
     -KeyUsage DigitalSignature `
-    -FriendlyName $CertFriendly `
-    -CertStoreLocation $CertStore `
+    -FriendlyName $config.FriendlyName `
+    -CertStoreLocation $config.StoreLocation `
     -TextExtension @("2.5.29.37={text}1.3.6.1.5.5.7.3.3", "2.5.29.19={text}") `
-    -NotAfter (Get-Date).AddYears($CertYears) `
+    -NotAfter (Get-Date).AddYears($config.ValidityYears) `
     -KeyExportPolicy Exportable
 
 try {
     Export-Certificate -Cert $cert -FilePath $CerFile -Type CERT -Force | Out-Null
 
-    $Password = ConvertTo-SecureString -String $CertPassword -Force -AsPlainText
+    $Password = ConvertTo-SecureString -String $config.Password -Force -AsPlainText
     Export-PfxCertificate -Cert $cert -FilePath $PfxFile -Password $Password -Force | Out-Null
 
     $pfxBytes = [IO.File]::ReadAllBytes($PfxFile)

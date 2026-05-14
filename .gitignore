@@ -1,6 +1,5 @@
-# 证书和密钥
 *.pfx
 *.pfx.txt
 *.cer
 *.key
-THUMBPRINT.txt
+*.Thumbprint.txt
