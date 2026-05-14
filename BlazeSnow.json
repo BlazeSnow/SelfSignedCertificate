@@ -1,0 +1,13 @@
+{
+    "Subject": "CN=C171AF55-419C-4E73-B34E-CB98C8F1EB78",
+    "FriendlyName": "BlazeSnow Signing Certificate",
+    "ValidityYears": 10,
+    "StoreLocation": "Cert:\\CurrentUser\\My",
+    "Password": " ",
+    "OutputFiles": {
+        "Cer": "BlazeSnow.cer",
+        "Pfx": "BlazeSnow.pfx",
+        "PfxBase64": "BlazeSnow.pfx.txt",
+        "Thumbprint": "BlazeSnow.Thumbprint.txt"
+    }
+}
