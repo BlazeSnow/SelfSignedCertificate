@@ -1,0 +1,13 @@
+{
+    "Subject": "CN=68F867E4-B304-4B5D-9818-31B1910E0771",
+    "FriendlyName": "IPAbuyer Signing Certificate",
+    "ValidityYears": 10,
+    "StoreLocation": "Cert:\\CurrentUser\\My",
+    "Password": " ",
+    "OutputFiles": {
+        "Cer": "IPAbuyer.cer",
+        "Pfx": "IPAbuyer.pfx",
+        "PfxBase64": "IPAbuyer.pfx.txt",
+        "Thumbprint": "IPAbuyer.Thumbprint.txt"
+    }
+}
